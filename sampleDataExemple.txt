@@ -1,0 +1,31 @@
+Starting data:
+
+[{
+    "_id": "6045f2e18d823b574cd15f9d",
+    "name": "Tyson",
+    "path": "Villarreal",
+    "occuredOn": "Wednesday, August 5, 2015 11:33 AM"
+  },
+  {
+    "_id": "6045f2e18d823b574cd15f9d",
+    "name": "Tyson",
+    "path": "Villarreal",
+    "occuredOn": "Wednesday, January 10, 2015 12:33 AM"
+  }]
+
+Result data: 
+
+[
+    {
+        "_id": "6045f2e18d823b574cd15f9d",
+        "name": "Tyson",
+        "path": "Villarreal",
+        "occuredOn": "2015-08-5T11:33"
+    },
+    {
+        "_id": "6045f2e18d823b574cd15f9d",
+        "name": "Tyson",
+        "path": "Villarreal",
+        "occuredOn": "2015-08-10T00:33"
+    }
+]

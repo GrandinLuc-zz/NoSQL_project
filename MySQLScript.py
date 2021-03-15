@@ -5,7 +5,7 @@ mydbSQL = mysql.connector.connect(
   host="localhost",
   user="root",
   password="iD8DBQBeFL3pjHGNO1By4fURAt2yAKCFs5XrQlaTBqE1f536MgL2fxNiCQCgkPM+",
-    database="dossier"
+  database="dossier"
 )
 
 #print(mydbSQL)
@@ -51,10 +51,11 @@ myresult = mycursor.fetchall()
 #for x in myresult:
 #  print(x)
 
-def insertion_simple(val):
+def insertion_simple(val,db):
     sql = 'INSERT INTO `dossier`.`element` (id_element,valeur,date,path,object_name) VALUES (%s,%s,%s,%s,%s)'
-    mycursor.execute(sql, val)
-    mydbSQL.commit()
+    cursor = mydbSQL.cursor(buffered=True)
+    cursor.execute(sql, val)
+    db.commit()
     #print(mycursor.rowcount, "was inserted.")
     return None
 

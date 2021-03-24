@@ -1,16 +1,19 @@
 import mysql.connector
-from datetime import datetime
+import datetime
 
 mydbSQL = mysql.connector.connect(
   host="localhost",
   user="root",
-  password="iD8DBQBeFL3pjHGNO1By4fURAt2yAKCFs5XrQlaTBqE1f536MgL2fxNiCQCgkPM+",
-  database="dossier"
+  password="mdp"
 )
 
 #print(mydbSQL)
 
 mycursor = mydbSQL.cursor(buffered=True)
+# creation de la table
+file =open('database.txt','r')
+for line in file:
+    mycursor.execute(line)
 
 ### Insertion multiple dans nom_fichier
 sql = 'INSERT INTO `dossier`.`nom_fichier` (object_name) VALUES (%s)'
@@ -29,7 +32,7 @@ mycursor.executemany(sql, val)
 mydbSQL.commit()
 #print(mycursor.rowcount, "was inserted.")
 
-now = datetime.now()
+now = datetime.datetime.now()
 dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
 #print("Today's date: ",dt_string)
 #print(type(dt_string))
@@ -51,55 +54,122 @@ myresult = mycursor.fetchall()
 #for x in myresult:
 #  print(x)
 
+#############################################################
+def reformat_date(date_str):
+    date=datetime.datetime.strptime(date_str,"%Y-%m-%dT%H:%M:%S.%f")
+    new_date=date.strftime("%d-%m-%Y %H:%M:%S")
+    return new_date
+
+def lire(file_path):
+    #PARAMETERS
+    dossier_nom=[]
+    dossier_element=[]
+    dossier=[]
+    
+    #COMPTEUR
+    Compteur=[]
+    Liste_Nom=[]
+    
+    #Récupération
+    file= open(file_path,"r")
+    for line in file:
+        dossier.append(eval(line))
+    file.close()
+        
+        
+    for i in dossier:
+        
+        if(i['object-name'] in Liste_Nom):
+            Compteur[Liste_Nom.index(i['object-name'])] +=1
+        else:
+            dossier_nom.append([i['object-name']])
+            Liste_Nom.append(i['object-name'])
+            Compteur.append(0)
+        dossier_element.append([i['object-name']+'_'+str(Compteur[Liste_Nom.index(i['object-name'])]),Compteur[Liste_Nom.index(i['object-name'])],reformat_date(i['occurredOn']),i['path'],i['object-name']])
+    return dossier_nom, dossier_element
+
+### Insertion multiple dans nom_fichier
+def insertion_multiple_fichier(val,db):
+    sql = 'INSERT INTO `dossier`.`nom_fichier` (object_name) VALUES (%s)'
+    #val=['A2']
+    #val = dossier_nom
+    cursor = db.cursor(buffered=True)
+    cursor.executemany(sql, val)
+    #mycursor.execute(sql, val)
+    db.commit()
+    print(cursor.rowcount, "was inserted.")
+    return None
+
+### Insertion multiple dans element
+def insertion_multiple_element(val, db):
+    sql = 'INSERT INTO `dossier`.`element` (id_element,valeur,date,path,object_name) VALUES (%s,%s,%s,%s,%s)'
+    #val = dossier_element
+    cursor = db.cursor(buffered=True)
+    cursor.executemany(sql, val)
+    #mycursor.execute(sql, val)
+    db.commit()
+    print(cursor.rowcount, "was inserted.")
+    return None
+
+# INSERTION D'UN NOUVEAU ELEMENT
 def insertion_simple(val,db):
     sql = 'INSERT INTO `dossier`.`element` (id_element,valeur,date,path,object_name) VALUES (%s,%s,%s,%s,%s)'
-    cursor = mydbSQL.cursor(buffered=True)
+    cursor = db.cursor(buffered=True)
     cursor.execute(sql, val)
     db.commit()
     #print(mycursor.rowcount, "was inserted.")
     return None
 
-def get_date():
-    now = datetime.now()
+#AVOIR LA DATE
+def get_date(heureDelta=0):
+    now = datetime.datetime.now() - datetime.timedelta(hours=heureDelta)
     dt_string = now.strftime("%d-%m-%Y %H:%M:%S")
     return dt_string
 
-def info(object_name):
+#PRENDRE LES INFOS D'UN FICHIER ET RETOURNER UNE LISTE
+def info(object_name,db):
     info=[]
     val=[]
     sql=("SELECT * FROM element Where object_name = %s ORDER BY valeur")
+    cursor = db.cursor(buffered=True)
     val.append(object_name)
-    mycursor.execute(sql,val)
-    myresult = mycursor.fetchall()
+    cursor.execute(sql,val)
+    myresult = cursor.fetchall()
     for x in myresult:
         info.append([x[0],x[1],x[2],x[3],x[4]])
     return info
 
-def info_total_list():
+#PRENDRE TOUS ET RETOURNER UNE LISTE
+def info_total_list(db):
     info=[]
     sql=("SELECT * FROM element ORDER BY valeur")
-    mycursor.execute(sql)
-    myresult = mycursor.fetchall()
+    cursor = db.cursor(buffered=True)
+    cursor.execute(sql)
+    myresult = cursor.fetchall()
     for x in myresult:
         info.append([x[0],x[1],x[2],x[3],x[4]])
     return info
 
-def info_total_dict():
+#PRENDRE TOUS ET RETOURNER UNE LISTE DE DICTIONNAIRE
+def info_total_dict(db):
     info=[]
     sql=("SELECT * FROM element ORDER BY valeur")
-    mycursor.execute(sql)
-    value = mycursor.fetchall()
+    cursor = db.cursor(buffered=True)
+    cursor.execute(sql)
+    value = cursor.fetchall()
     for myresult in value:
         dic={'id_element':myresult[0],'valeur':myresult[1],'date':myresult[2],'path':myresult[3],'object_name':myresult[4]}
         info.append(dic)
     return info
 
-def info_last(object_name):
+#PRENDRE LE DERNIER UPDATE D'UN FICHIER
+def info_last(object_name,db):
     val=[]
     sql=("SELECT * FROM element Where object_name = %s ORDER BY valeur DESC")
     val.append(object_name)
-    mycursor.execute(sql,val)
-    myresult = mycursor.fetchone()
+    cursor = db.cursor(buffered=True)
+    cursor.execute(sql,val)
+    myresult = cursor.fetchone()
     info={'id_element':myresult[0],'valeur':myresult[1],'date':myresult[2],'path':myresult[3],'object_name':myresult[4]}
     return info
 
@@ -114,25 +184,15 @@ def new_path():
         verify=eval(input(enc))
     return path[:-1]
 
-P=info('A2')
-
-#print(P)
-
-def Insertion_path(object_name):
-    I=info_last(object_name)
+def Insertion_path(object_name,db):
+    I=info_last(object_name,db)
     valeur=I['valeur']+1
     id_element=object_name+'_'+str(valeur)
     date= get_date()
     path=new_path()
     val=[id_element,valeur,date,path,object_name]
-    insertion_simple(val)
+    insertion_simple(val,db)
     return None
-
-
-#Insertion_path('A2')
-#info('A2')
-#info_total_list()
-#info_total_dict()
 
 
 mydbSQL.close()

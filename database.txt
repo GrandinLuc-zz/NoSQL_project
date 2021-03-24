@@ -1,0 +1,8 @@
+DROP DATABASE IF EXISTS dossier;
+CREATE DATABASE dossier ;
+USE `dossier`;
+CREATE TABLE nom_fichier (object_name varchar(50) NOT NULL);  
+CREATE TABLE element (id_element varchar(30) NOT NULL, valeur int, date varchar(30), path varchar(100), object_name varchar(50));  
+ALTER TABLE nom_fichier ADD CONSTRAINT PK_nom_fichier PRIMARY KEY (object_name);  
+ALTER TABLE element ADD CONSTRAINT PK_element PRIMARY KEY (id_element);  
+ALTER TABLE element ADD CONSTRAINT FK_element_object_name FOREIGN KEY (object_name) REFERENCES nom_fichier (object_name); 

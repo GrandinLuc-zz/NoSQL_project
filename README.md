@@ -14,6 +14,7 @@ To change the data to get the right date format use the following script: node c
 [follow instruction here](https://dev.mysql.com/doc/mysql-installation-excerpt/5.7/en/) 
 
 Créer dans `C:\Users\#nom>` un fichier `Integ` et y placer les fichiers pour les installations suivantes :
+
 2) MongoDB :
 >  Système de gestion de base de données NoSQL orientée documents.
 [follow instruction here](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-windows/)
@@ -39,4 +40,4 @@ cd .\redis\64bit\
 ```
 lancer `main.py`
 - Donner son mot de passe MySQL
-- Le numéro de l'object à étudier
+- Le numéro du fichier à étudier

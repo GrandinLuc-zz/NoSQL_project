@@ -1,10 +1,10 @@
 import mysql.connector
 import datetime
-
+from getpass import getpass
 mydbSQL = mysql.connector.connect(
   host="localhost",
   user="root",
-  password="mdp"
+  password=getpass('mysql password : ')
 )
 
 #print(mydbSQL)
@@ -193,6 +193,51 @@ def Insertion_path(object_name,db):
     val=[id_element,valeur,date,path,object_name]
     insertion_simple(val,db)
     return None
+
+# Polling
+def Polling(file_path,db):
+    #CURSEUR
+    Liste_Nom=[]
+    Compteur=[]
+    cursor = db.cursor(buffered=True)
+    cursor.execute("SELECT object_name,max(valeur) from element group by object_name")
+    myresult=cursor.fetchall()
+    for x in myresult:
+        Liste_Nom.append(x[0])
+        Compteur.append(x[1])
+    print(Compteur)
+    #PARAMETERS
+    dossier_nom=[]
+    dossier_element=[]
+    dossier=[]
+    
+    #Récupération
+    file= open(file_path,"r")
+    for line in file:
+        dossier.append(eval(line))
+    file.close()
+        
+        
+    for i in dossier:
+        
+        if(i['object-name'] in Liste_Nom):
+            Compteur[Liste_Nom.index(i['object-name'])] +=1
+        else:
+            dossier_nom.append([i['object-name']])
+            Liste_Nom.append(i['object-name'])
+            Compteur.append(0)
+        dossier_element.append([i['object-name']+'_'+str(Compteur[Liste_Nom.index(i['object-name'])]),Compteur[Liste_Nom.index(i['object-name'])],reformat_date(i['occurredOn']),i['path'],i['object-name']])
+        
+    # insertion du polling
+    sql = 'INSERT INTO `dossier`.`nom_fichier` (object_name) VALUES (%s)'
+    val = dossier_nom
+    cursor.executemany(sql, val)
+    db.commit()
+    
+    sql = 'INSERT INTO `dossier`.`element` (id_element,valeur,date,path,object_name) VALUES (%s,%s,%s,%s,%s)'
+    val = dossier_element
+    cursor.executemany(sql, val)
+    db.commit()
 
 
 mydbSQL.close()

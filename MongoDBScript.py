@@ -82,5 +82,10 @@ def Mongo_Meta(object_name,mycol):
         Metadonnee+=x['date']+' '+x['path']+' ===> \n'
     return Metadonnee
 
+def MAJ_Mongo(info_dict,mycol):
+    mycol.drop()
+    x = mycol.insert_many(info_dict)
+    return x
+
 mycol.drop()
 myclient.close()
